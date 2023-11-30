@@ -53,12 +53,15 @@ class Schedule(object):
             prob_list = []
 
             # Bigger Mutations are less probable
-            if prob < 0.15:
+            if prob < 0.2:
+                for _ in range(3):
+                    prob_list.append(random.randint(0, 2))
+            elif prob < 0.5:
                 for _ in range(2):
-                    prob_list.append(random.randint(0,2))
+                    prob_list.append(random.randint(0, 2))
             else:
                 for _ in range(1):
-                    prob_list.append(random.randint(0,2))
+                    prob_list.append(random.randint(0, 2))
             # Mutate an attribute
             for _ in prob_list:
                 if _ == 0:
@@ -68,7 +71,7 @@ class Schedule(object):
                     # Change Teacher
                     gene.teacher = random.choice(TEACHERS_W_SUBJECTS)
                 if _ == 2:
-                    # Change group
+                    # Change Group
                     gene.group = random.choice(GROUPS_W_SUBJECTS)
 
         return gene
@@ -83,39 +86,32 @@ class Schedule(object):
         # chromosome for offspring
         child_chromosome = []
 
-        # Uniform Crossover
-        for gp1, gp2 in zip(self.chromosome, par2.chromosome):
+        # Avoid having an empty chromosome
+        while not child_chromosome:
+            # Uniform Crossover
+            if random.random() < 0.7:
+                for gp1, gp2 in zip(self.chromosome, par2.chromosome):
+                    # insert gene from parent 1
+                    if random.random() < 0.50:
+                        child_chromosome.append(gp1)
 
-            # random probability
-            prob = random.random()
+                    # insert gene from parent 2
+                    else:
+                        child_chromosome.append(gp2)
 
-            # insert gene from parent 1
-            if prob < 0.40:
-                child_chromosome.append(gp1)
+            if random.random() < 0.2:
+                # Self Mutation
+                if not child_chromosome:
+                    child_chromosome = self.chromosome
 
-            # insert gene from parent 2
-            elif prob < 0.80:
-                child_chromosome.append(gp2)
+                number_of_mutations = random.randint(1, TIMETABLE_SIZE // 2)
+                for _ in range(number_of_mutations):
+                    gene = random.choice(child_chromosome)
+                    child_chromosome[child_chromosome.index(gene)] = self.mutated_genes(gene)
 
-            # otherwise mutate
-            else:
-                # child_chromosome.append(self.mutated_genes(None))
-                prob = random.random()
-                if prob < 0.40:
-                    child_chromosome.append(self.mutated_genes(gp1))
-                elif prob < 0.80:
-                    child_chromosome.append(self.mutated_genes(gp2))
-                else:
-                    child_chromosome.append(self.mutated_genes(None))
-
-
-        # create new Schedule(offspring) using
-        # generated chromosome for offspring
         return Schedule(child_chromosome)
 
     def cal_fitness(self):
-        fitness = 0
-
         teacher_overtime = 0
         teacher_wrong_subject = 0
         group_wrong_subject = 0
@@ -152,15 +148,14 @@ class Schedule(object):
         return fitness
 
 
-# Driver code
 def main():
     global POPULATION_SIZE
 
-    # current generation
     generation = 1
 
     stop = False
     population = []
+    avg_fitness = 0
 
     # create initial population
     for _ in range(POPULATION_SIZE):
@@ -180,19 +175,18 @@ def main():
         # if the individual having lowest fitness score ie.
         # 0 then we know that we have reached to the target
         # and break the loop
-        if population[0].fitness <= 1 or generation > GENERATION_LIMIT:
+        if population[0].fitness < 1 or generation > GENERATION_LIMIT:
             stop = True
             break
 
         # Otherwise generate new offsprings for new generation
         new_generation = []
 
-        # Perform Elitism, that mean 10% of fittest population
-        # goes to the next generation
+        # Elitism, 10% of fittest population goes to the next generation
         s = int((10 * POPULATION_SIZE) / 100)
         new_generation.extend(population[:s])
 
-        # From 50% of fittest population, Individuals
+        # From 50% of fittest population, population
         # will mate to produce offspring
         s = int((90 * POPULATION_SIZE) / 100)
         for _ in range(s):
@@ -206,15 +200,18 @@ def main():
         generation += 1
 
         if generation % 10 == 0:
-            print_chromosome(generation, population[0].chromosome, population[0].fitness, population[-1].fitness, avg_fitness)
+            print_chromosome(generation, population[0].chromosome, population[0].fitness, population[-1].fitness,
+                             avg_fitness)
 
     print_chromosome(generation, population[0].chromosome, population[0].fitness, population[-1].fitness, avg_fitness)
 
 
 def print_chromosome(generation, chromosome, best_fitness, worst_fitness, avg_fitness):
-    print("Generation: {}\tBest Fitness:{}\tWorst Fitness: {}\t Average Fitness: {}".format(generation, best_fitness, worst_fitness, avg_fitness))
+    print("Generation: {}\tBest Fitness:{}\tWorst Fitness: {}\t Average Fitness: {}".format(generation, best_fitness,
+                                                                                            worst_fitness, avg_fitness))
     for lecture in chromosome:
-        print("Class: {}\tTeacher: {} | Subject: {} | Group: {}".format(chromosome.index(lecture) + 1, lecture.teacher[0],
+        print(
+            "Class: {}\tTeacher: {} | Subject: {} | Group: {}".format(chromosome.index(lecture) + 1, lecture.teacher[0],
                                                                       lecture.subject, lecture.group[0]))
     print()
 
