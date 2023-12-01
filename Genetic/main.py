@@ -2,25 +2,28 @@ import random
 
 POPULATION_SIZE = 500
 
-GENERATION_LIMIT = 100000
+GENERATION_LIMIT = 5000
 
 TIMETABLE_SIZE = 15
 
-SUBJECTS = ["Math", "Philosophy", "Physics", "Geography"]
+SUBJECTS = ["Discrete Math", "Physics", "Programming", "Chemistry", "Philosophy", "Calculus"]
 TEACHERS = ["Smith", "Camber", "Keppler", "Barack"]
-GROUPS = ["A-1", "A-2", "B-1"]
+GROUPS = ["A-1", "A-2", "B-1", "B-2", "C-1", "C-2"]
 
 GROUPS_W_SUBJECTS = [
-    ("A-1", {"Math": 3, "Physics": 2}),
-    ("A-2", {"Math": 2, "Physics": 2, "Philosophy": 1}),
-    ("B-1", {"Physics": 1, "Philosophy": 2, "Geography": 2})
+    ("A-1", {"Discrete Math": 3, "Chemistry": 2}),
+    ("A-2", {"Physics": 4, "Calculus": 2, "Philosophy": 1}),
+    ("B-1", {"Programming": 2, "Philosophy": 2, "Chemistry": 2}),
+    ("B-2", {"Calculus": 2, "Philosophy": 2, "Programming": 3}),
+    ("C-1", {"Discrete Math": 4, "Philosophy": 2, "Calculus": 2}),
+    ("C-2", {"Physics": 2, "Programming": 1, "Discrete Math": 2})
 ]
 
 TEACHERS_W_SUBJECTS = [
-    ("Smith", ["Math", "Physics"], 3),
-    ("Camber", ["Math"], 5),
-    ("Keppler", ["Philosophy", "Geography"], 6),
-    ("Barack", ["Philosophy", "Physics"], 7),
+    ("Smith", ["Discrete Math", "Physics"], 4),
+    ("Camber", ["Programming", "Chemistry"], 5),
+    ("Keppler", ["Philosophy", "Calculus"], 6),
+    ("Barack", ["Discrete Math", "Physics", "Programming"], 7),
 ]
 
 
@@ -99,7 +102,7 @@ class Schedule(object):
                     else:
                         child_chromosome.append(gp2)
 
-            if random.random() < 0.2:
+            if random.random() < 0.3:
                 # Self Mutation
                 if not child_chromosome:
                     child_chromosome = self.chromosome
